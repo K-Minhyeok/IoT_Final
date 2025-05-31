@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Campus Population Map</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+    }
+    #map {
+      height: 100%;
+      width: 100%;
+      background: #000;
+    }
+  </style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+  const buildingData = JSON.parse('{{ data | tojson | safe }}');
+
+  const imageUrl = "{{ url_for('static', filename='images/campus_map.png') }}";
+  const imageBounds = [[0, 0], [1000, 1600]];  // 실제 이미지 크기에 맞춰야 함
+
+  const map = L.map('map', {
+    crs: L.CRS.Simple,
+    minZoom: -1,
+    maxZoom: 2,
+    zoomSnap: 0.1
+  });
+  L.imageOverlay(imageUrl, imageBounds).addTo(map);
+  map.fitBounds(imageBounds);
+
+  const buildingCoords = {
+    "Room1": [340, 350],     // 오석관
+    "Gym": [690, 1410],      // 비전관
+    "Cafeteria": [360, 910]  // 학관
+  };
+
+  // 사람 수에 따른 색상 지정
+  function getColor(count) {
+    if (count < 50) return 'green';
+    else if (count < 120) return 'yellow';
+    else return 'red';
+  }
+
+  for (const [name, count] of Object.entries(buildingData)) {
+    const coord = buildingCoords[name];
+    if (!coord) continue;
+
+    L.circle(coord, {
+      radius: 40, // 고정 크기
+      color: getColor(count),
+      fillColor: getColor(count),
+      fillOpacity: 0.6
+    }).addTo(map).bindPopup(`${name}: ${count}명`);
+  }
+</script>
+
+</body>
+</html>
