@@ -48,7 +48,7 @@
 
 <div class="container">
   <div id="status">
-    <h2>현황</h2>
+    <h2 id="datetime-header">밀집도 현황 (--)</h2>
     <div class="stat-line" id="time"></div>
     <div class="stat-line" id="room1"></div>
     <div class="stat-line" id="cafeteria"></div>
@@ -97,11 +97,14 @@
     const now = new Date();
     const hh = String(now.getHours()).padStart(2, '0');
     const mm = String(now.getMinutes()).padStart(2, '0');
-    document.getElementById('time').innerText = `시각 : ${hh}:${mm}분`;
+    const month = String(now.getMonth() + 1).padStart();
+    const date_today = String(now.getDate()).padStart();
+    document.getElementById('time').innerText = `[ 시각 : ${hh} : ${mm} ]`;
     document.getElementById('room1').innerText = `- Room1 : ${data["Room1"] ?? 0}명`;
     document.getElementById('cafeteria').innerText = `- Cafeteria : ${data["Cafeteria"] ?? 0}명`;
     document.getElementById('gym').innerText = `- Gym : ${data["Gym"] ?? 0}명`;
-
+    document.getElementById('datetime-header').innerText = `밀집도 현황 (${month}/${date_today})`;
+    
     // 지도 마커 업데이트
     markerLayer.clearLayers(); // 기존 원 제거
     for (const [name, count] of Object.entries(data)) {
