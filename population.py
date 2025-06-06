@@ -17,12 +17,18 @@ def save_population(data):
     with open(DATA_FILE, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
+@app.route('/population')
+def get_population():
+    data = load_population()
+    return jsonify(data)
+
+
 # 인원수 업데이트 - 일반 API (/update)
 @app.route('/update', methods=['POST'])
 def update_population():
     content = request.json
     building = content.get("building")
-    direction = content.get("direction")  # "in" or "out"
+    direction = content.get("direction")  
 
     data = load_population()
     if building not in data:
@@ -38,7 +44,7 @@ def update_population():
 
 @app.route('/lora', methods=['POST'])
 def update_from_lora():
-    content = request.get_data(as_text=True).strip()  # ex: "room1:in"
+    content = request.get_data(as_text=True).strip() 
     print(content)
     try:
         building, direction = content.split(":")

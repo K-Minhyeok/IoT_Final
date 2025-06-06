@@ -6,67 +6,130 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
     html, body {
-      height: 100%;
       margin: 0;
+      height: 100%;
+      font-family: sans-serif;
     }
-    #map {
+
+    .container {
+      display: flex;
       height: 100%;
       width: 100%;
+    }
+
+    #status {
+      width: 300px;
+      background-color: #122b4d;
+      color: white;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    #status h2 {
+      text-align: center;
+      border-bottom: 1px solid white;
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+    }
+
+    .stat-line {
+      font-size: 18px;
+      margin-bottom: 15px;
+    }
+
+    #map {
+      flex-grow: 1;
+      height: 100%;
       background: #000;
     }
   </style>
 </head>
 <body>
 
-<div id="map"></div>
+<div class="container">
+  <div id="status">
+    <h2>현황</h2>
+    <div class="stat-line" id="time"></div>
+    <div class="stat-line" id="room1"></div>
+    <div class="stat-line" id="cafeteria"></div>
+    <div class="stat-line" id="gym"></div>
+  </div>
+
+  <div id="map"></div>
+</div>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
-  const buildingData = JSON.parse('{{ data | tojson | safe }}');
-
   const imageUrl = "{{ url_for('static', filename='images/campus_map.png') }}";
-  const imageBounds = [[0, 0], [1000, 1600]];  // 실제 이미지 크기에 맞춰야 함
+  const imageBounds = [[0, 0], [1000, 1600]];
+  const buildingCoords = {
+    "Room1": [340, 350],
+    "Gym": [690, 1410],
+    "Cafeteria": [360, 910]
+  };
 
- const map = L.map('map', {
-  crs: L.CRS.Simple,
-  minZoom: -1,
-  maxZoom: 2,
-  zoomSnap: 0.1,
-  dragging: false,
-  scrollWheelZoom: false,
-  doubleClickZoom: false,
-  boxZoom: false,
-  touchZoom: false,
-  zoomControl: false
-});
+  const map = L.map('map', {
+    crs: L.CRS.Simple,
+    minZoom: -1,
+    maxZoom: 2,
+    zoomSnap: 0.1,
+    dragging: false,
+    scrollWheelZoom: false,
+    doubleClickZoom: false,
+    boxZoom: false,
+    touchZoom: false,
+    zoomControl: false
+  });
 
   L.imageOverlay(imageUrl, imageBounds).addTo(map);
   map.fitBounds(imageBounds);
 
-  const buildingCoords = {
-    "Room1": [340, 350],     // 오석관
-    "Gym": [690, 1410],      // 비전관
-    "Cafeteria": [360, 910]  // 학관
-  };
+  let markerLayer = L.layerGroup().addTo(map); // 동그라미 갱신용
 
-  // 사람 수에 따른 색상 지정
   function getColor(count) {
     if (count < 50) return 'green';
     else if (count < 120) return 'yellow';
     else return 'red';
   }
 
-  for (const [name, count] of Object.entries(buildingData)) {
-    const coord = buildingCoords[name];
-    if (!coord) continue;
+  function updateDisplay(data) {
+    // 시각 업데이트
+    const now = new Date();
+    const hh = String(now.getHours()).padStart(2, '0');
+    const mm = String(now.getMinutes()).padStart(2, '0');
+    document.getElementById('time').innerText = `시각 : ${hh}:${mm}분`;
+    document.getElementById('room1').innerText = `- Room1 : ${data["Room1"] ?? 0}명`;
+    document.getElementById('cafeteria').innerText = `- Cafeteria : ${data["Cafeteria"] ?? 0}명`;
+    document.getElementById('gym').innerText = `- Gym : ${data["Gym"] ?? 0}명`;
 
-    L.circle(coord, {
-      radius: 40, // 고정 크기
-      color: getColor(count),
-      fillColor: getColor(count),
-      fillOpacity: 0.6
-    }).addTo(map).bindPopup(`${name}: ${count}명`);
+    // 지도 마커 업데이트
+    markerLayer.clearLayers(); // 기존 원 제거
+    for (const [name, count] of Object.entries(data)) {
+      const coord = buildingCoords[name];
+      if (!coord) continue;
+
+      L.circle(coord, {
+        radius: 40,
+        color: getColor(count),
+        fillColor: getColor(count),
+        fillOpacity: 0.6
+      }).bindPopup(`${name}: ${count}명`).addTo(markerLayer);
+    }
   }
+
+  // 최초 로딩 + 3초마다 자동 갱신
+  async function fetchAndUpdate() {
+    try {
+      const res = await fetch('/population');
+      const data = await res.json();
+      updateDisplay(data);
+    } catch (err) {
+      console.error('데이터 갱신 실패:', err);
+    }
+  }
+
+  fetchAndUpdate(); // 최초 한 번 실행
+  setInterval(fetchAndUpdate, 3000); // 3초마다 갱신
 </script>
 
 </body>
