@@ -27,12 +27,19 @@
   const imageUrl = "{{ url_for('static', filename='images/campus_map.png') }}";
   const imageBounds = [[0, 0], [1000, 1600]];  // 실제 이미지 크기에 맞춰야 함
 
-  const map = L.map('map', {
-    crs: L.CRS.Simple,
-    minZoom: -1,
-    maxZoom: 2,
-    zoomSnap: 0.1
-  });
+ const map = L.map('map', {
+  crs: L.CRS.Simple,
+  minZoom: -1,
+  maxZoom: 2,
+  zoomSnap: 0.1,
+  dragging: false,
+  scrollWheelZoom: false,
+  doubleClickZoom: false,
+  boxZoom: false,
+  touchZoom: false,
+  zoomControl: false
+});
+
   L.imageOverlay(imageUrl, imageBounds).addTo(map);
   map.fitBounds(imageBounds);
 
