@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <title>Campus Population Map</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
     html, body {
@@ -13,23 +14,33 @@
 
     .container {
       display: flex;
+      flex-direction: row;
       height: 100%;
       width: 100%;
+      overflow: hidden;
     }
 
     #status {
-      width: 300px;
+      min-width: 300px;
       background-color: #122b4d;
       color: white;
       padding: 20px;
       box-sizing: border-box;
+      flex-shrink: 1;
     }
 
-    #status h2 {
+    .header-title {
       text-align: center;
-      border-bottom: 1px solid white;
-      padding-bottom: 10px;
-      margin-bottom: 20px;
+      font-size: 32px;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    .header-sub {
+      text-align: center;
+      font-size: 20px;
+      color: #ddd;
+      margin-top: 5px;
     }
 
     .stat-line {
@@ -40,7 +51,23 @@
     #map {
       flex-grow: 1;
       height: 100%;
-      background: #000;
+      width: 100%;
+      background: none;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+      #status {
+        width: 100%;
+        height: auto;
+        padding: 15px;
+      }
+      #map {
+        height: 70%;
+        width: 100%;
+      }
     }
   </style>
 </head>
@@ -48,8 +75,9 @@
 
 <div class="container">
   <div id="status">
-    <h2 id="datetime-header">밀집도 현황 (--)</h2>
-    <div class="stat-line" id="time"></div>
+    <div class="header-title">밀집도 현황</div>
+    <div class="header-sub" id="datetime-header">[ MM/DD ] HH : MM</div>
+    <hr style="border-color: white; margin: 10px 0;">
     <div class="stat-line" id="room1"></div>
     <div class="stat-line" id="cafeteria"></div>
     <div class="stat-line" id="gym"></div>
@@ -61,11 +89,12 @@
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
   const imageUrl = "{{ url_for('static', filename='images/campus_map.png') }}";
-  const imageBounds = [[0, 0], [1000, 1600]];
+  const imageBounds = [[0, 0], [869, 1170]];  // 이미지 해상도 비율 그대로
+
   const buildingCoords = {
-    "Room1": [340, 350],
-    "Gym": [690, 1410],
-    "Cafeteria": [360, 910]
+    "Room1": [290, 255],     // 오석관 중앙
+    "Gym": [600, 1040],     
+    "Cafeteria": [315, 665]  // 학관 중앙
   };
 
   const map = L.map('map', {
@@ -84,7 +113,11 @@
   L.imageOverlay(imageUrl, imageBounds).addTo(map);
   map.fitBounds(imageBounds);
 
-  let markerLayer = L.layerGroup().addTo(map); // 동그라미 갱신용
+  window.addEventListener('resize', () => {
+    map.invalidateSize();
+  });
+
+  let markerLayer = L.layerGroup().addTo(map);
 
   function getColor(count) {
     if (count < 50) return 'green';
@@ -93,20 +126,18 @@
   }
 
   function updateDisplay(data) {
-    // 시각 업데이트
     const now = new Date();
     const hh = String(now.getHours()).padStart(2, '0');
-    const mm = String(now.getMinutes()).padStart(2, '0');
-    const month = String(now.getMonth() + 1).padStart();
-    const date_today = String(now.getDate()).padStart();
-    document.getElementById('time').innerText = `[ 시각 : ${hh} : ${mm} ]`;
+    const mi = String(now.getMinutes()).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const date_today = String(now.getDate()).padStart(2, '0');
+
+    document.getElementById('datetime-header').innerText = `[ ${month}/${date_today} ] ${hh} : ${mi}`;
     document.getElementById('room1').innerText = `- Room1 : ${data["Room1"] ?? 0}명`;
     document.getElementById('cafeteria').innerText = `- Cafeteria : ${data["Cafeteria"] ?? 0}명`;
     document.getElementById('gym').innerText = `- Gym : ${data["Gym"] ?? 0}명`;
-    document.getElementById('datetime-header').innerText = `밀집도 현황 (${month}/${date_today})`;
-    
-    // 지도 마커 업데이트
-    markerLayer.clearLayers(); // 기존 원 제거
+
+    markerLayer.clearLayers();
     for (const [name, count] of Object.entries(data)) {
       const coord = buildingCoords[name];
       if (!coord) continue;
@@ -120,7 +151,6 @@
     }
   }
 
-  // 최초 로딩 + 3초마다 자동 갱신
   async function fetchAndUpdate() {
     try {
       const res = await fetch('/population');
@@ -131,8 +161,8 @@
     }
   }
 
-  fetchAndUpdate(); // 최초 한 번 실행
-  setInterval(fetchAndUpdate, 3000); // 3초마다 갱신
+  fetchAndUpdate();
+  setInterval(fetchAndUpdate, 3000);
 </script>
 
 </body>
