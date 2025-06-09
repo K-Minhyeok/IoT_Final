@@ -9,6 +9,7 @@ from datetime import datetime
 app = Flask(__name__)
 DATA_FILE = 'population.json'
 EXCEL_FILE = 'population_log.xlsx'
+BUILDINGS = ["Room1", "Cafeteria", "Gym"]
 
 # JSON 파일 불러오기
 def load_population():
@@ -24,17 +25,22 @@ def save_population(data):
 
 def save_to_excel_periodically():
     while True:
-        time.sleep(10) 
+        time.sleep(10)  # 또는 테스트용으로 10
         data = load_population()
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        rows = [{"timestamp": timestamp, "building": k, "count": v} for k, v in data.items()]
-        df = pd.DataFrame(rows)
+
+        # 각 건물 값이 없으면 0으로 채움
+        row = {"timestamp": timestamp}
+        for b in BUILDINGS:
+            row[b] = data.get(b, 0)
+
+        df_new = pd.DataFrame([row])
 
         if os.path.exists(EXCEL_FILE):
             existing_df = pd.read_excel(EXCEL_FILE)
-            df = pd.concat([existing_df, df], ignore_index=True)
+            df_new = pd.concat([existing_df, df_new], ignore_index=True)
 
-        df.to_excel(EXCEL_FILE, index=False)
+        df_new.to_excel(EXCEL_FILE, index=False)
         print(f"[{timestamp}] Excel 저장 완료.")
 
 # 인원 조회 API
@@ -99,4 +105,4 @@ if __name__ == '__main__':
     # 스레드 직접 실행
     thread = threading.Thread(target=save_to_excel_periodically, daemon=True)
     thread.start()
-    app.run(debug=True)
+    app.run(debug=True, use_reloader=False)
