@@ -9,7 +9,8 @@
     html, body {
       margin: 0;
       height: 100%;
-      font-family: sans-serif;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f5f5f5;
     }
 
     .container {
@@ -27,6 +28,7 @@
       padding: 20px;
       box-sizing: border-box;
       flex-shrink: 1;
+      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.3);
     }
 
     .header-title {
@@ -52,7 +54,6 @@
       flex-grow: 1;
       height: 100%;
       width: 100%;
-      background: none;
     }
 
     @media (max-width: 768px) {
@@ -69,6 +70,33 @@
         width: 100%;
       }
     }
+
+    .info.legend {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 12px 16px;
+      font-size: 14px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      line-height: 20px;
+      color: #333;
+    }
+    .legend-title {
+      font-weight: bold;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    .legend-color {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      margin-right: 8px;
+      border: 1px solid #999;
+    }
   </style>
 </head>
 <body>
@@ -81,6 +109,54 @@
     <div class="stat-line" id="room1"></div>
     <div class="stat-line" id="cafeteria"></div>
     <div class="stat-line" id="gym"></div>
+
+    <!-- 버튼들 왼쪽 정렬 -->
+    <div style="text-align: left; margin-top: 30px;">
+      
+      <button onclick="window.location.href='/graph'" style="
+        padding: 12px 24px;
+        font-size: 16px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        margin-bottom: 15px;
+      ">
+        그래프 보기
+      </button>
+
+      <br>
+
+      <button onclick="window.location.href='/history_view'" style="
+        padding: 12px 24px;
+        font-size: 16px;
+        background-color: #28a745;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        margin-bottom: 15px;
+      ">
+        시간별 기록 보기
+      </button>
+
+      <br>
+
+      <button onclick="window.location.href='/cctv'" style="
+        padding: 12px 24px;
+        font-size: 16px;
+        background-color: #6c757d;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+      ">
+        현재 상태 보기
+      </button>
+
+    </div>
+
   </div>
 
   <div id="map"></div>
@@ -89,12 +165,12 @@
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
   const imageUrl = "{{ url_for('static', filename='images/campus_map.png') }}";
-  const imageBounds = [[0, 0], [869, 1170]];  // 이미지 해상도 비율 그대로
+  const imageBounds = [[0, 0], [869, 1170]];
 
   const buildingCoords = {
-    "Room1": [290, 255],     // 오석관 중앙
-    "Gym": [600, 1040],     
-    "Cafeteria": [315, 665]  // 학관 중앙
+    "Room1": [290, 255],
+    "Gym": [600, 1040],
+    "Cafeteria": [315, 665]
   };
 
   const map = L.map('map', {
@@ -112,10 +188,7 @@
 
   L.imageOverlay(imageUrl, imageBounds).addTo(map);
   map.fitBounds(imageBounds);
-
-  window.addEventListener('resize', () => {
-    map.invalidateSize();
-  });
+  window.addEventListener('resize', () => map.invalidateSize());
 
   let markerLayer = L.layerGroup().addTo(map);
 
@@ -123,6 +196,14 @@
     if (count < 50) return 'green';
     else if (count < 120) return 'yellow';
     else return 'red';
+  }
+
+  function getRadius(count) {
+    const minRadius = 20;
+    const maxRadius = 80;
+    const maxCount = 200;
+    const radius = minRadius + (Math.min(count, maxCount) / maxCount) * (maxRadius - minRadius);
+    return radius;
   }
 
   function updateDisplay(data) {
@@ -143,10 +224,10 @@
       if (!coord) continue;
 
       L.circle(coord, {
-        radius: 40,
+        radius: getRadius(count),
         color: getColor(count),
         fillColor: getColor(count),
-        fillOpacity: 0.6
+        fillOpacity: 0.7
       }).bindPopup(`${name}: ${count}명`).addTo(markerLayer);
     }
   }
@@ -163,6 +244,29 @@
 
   fetchAndUpdate();
   setInterval(fetchAndUpdate, 3000);
+
+  const legend = L.control({ position: 'topleft' });
+  legend.onAdd = function () {
+    const div = L.DomUtil.create('div', 'info legend');
+    div.innerHTML += '<div class="legend-title">인원 기준</div>';
+
+    const levels = [
+      { color: 'green', label: '50명 미만' },
+      { color: 'yellow', label: '50명 이상' },
+      { color: 'red', label: '120명 이상' }
+    ];
+
+    levels.forEach(l => {
+      div.innerHTML += `
+        <div class="legend-item">
+          <div class="legend-color" style="background:${l.color}"></div>
+          ${l.label}
+        </div>`;
+    });
+
+    return div;
+  };
+  legend.addTo(map);
 </script>
 
 </body>

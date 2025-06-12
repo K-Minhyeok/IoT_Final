@@ -95,6 +95,39 @@ def update_from_lora():
         return jsonify(success=True, updated=data[building])
     except Exception as e:
         return jsonify(success=False, error=str(e)), 400
+    
+# 그래프 페이지 라우터 추가
+@app.route('/graph')
+def graph_page():
+    return render_template('graph.html')
+
+# 시간별 기록 API (엑셀 불러오기)
+@app.route('/history')
+def get_history():
+    if not os.path.exists(EXCEL_FILE):
+        return jsonify({"error": "No data"}), 404
+
+    limit = request.args.get('limit', default=10, type=int)  # 파라미터 받기
+    df = pd.read_excel(EXCEL_FILE)
+    df = df.tail(limit)
+
+    result = {
+        "timestamp": df["timestamp"].tolist(),
+        "Room1": df["Room1"].tolist(),
+        "Cafeteria": df["Cafeteria"].tolist(),
+        "Gym": df["Gym"].tolist()
+    }
+    return jsonify(result)
+
+
+@app.route('/history_view')
+def history_page():
+    return render_template('history.html')
+
+@app.route('/cctv')
+def cctv_page():
+    return render_template('cctv.html')
+
 
 # 기본 메인 페이지
 @app.route('/')
