@@ -10,7 +10,7 @@
       margin: 0;
       height: 100%;
       font-family: 'Segoe UI', sans-serif;
-      background-color: #f5f5f5;
+      background-color: white;
     }
 
     .container {
@@ -50,11 +50,12 @@
       margin-bottom: 15px;
     }
 
-    #map {
-      flex-grow: 1;
-      height: 100%;
-      width: 100%;
-    }
+  #map {
+  flex-grow: 1;
+  height: 100%;
+  width: 100%;
+  background-color: white;   /* <-- 요거 추가! */
+}
 
     @media (max-width: 768px) {
       .container {
@@ -71,15 +72,17 @@
       }
     }
 
-    .info.legend {
-      background: rgba(255, 255, 255, 0.95);
-      padding: 12px 16px;
-      font-size: 14px;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-      line-height: 20px;
-      color: #333;
-    }
+.info.legend {
+  background: #f2f2f2;
+  padding: 16px 20px;  /* 패딩 확대 */
+  font-size: 16px;     /* 글씨 조금 키움 */
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  line-height: 24px;
+  color: #333;
+  margin-left: 40px;
+  margin-top: 30px;
+}
     .legend-title {
       font-weight: bold;
       margin-bottom: 8px;
@@ -91,12 +94,12 @@
       margin-bottom: 6px;
     }
     .legend-color {
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      margin-right: 8px;
-      border: 1px solid #999;
-    }
+  width: 18px;    /* 동그라미 조금 키움 */
+  height: 18px;
+  border-radius: 50%;
+  margin-right: 10px;
+  border: 1px solid #999;
+}
   </style>
 </head>
 <body>
@@ -110,7 +113,6 @@
     <div class="stat-line" id="cafeteria"></div>
     <div class="stat-line" id="gym"></div>
 
-    <!-- 버튼들 왼쪽 정렬 -->
     <div style="text-align: left; margin-top: 30px;">
       
       <button onclick="window.location.href='/graph'" style="
@@ -188,6 +190,8 @@
 
   L.imageOverlay(imageUrl, imageBounds).addTo(map);
   map.fitBounds(imageBounds);
+  map.setZoom(map.getZoom());  // 확대 적용
+
   window.addEventListener('resize', () => map.invalidateSize());
 
   let markerLayer = L.layerGroup().addTo(map);

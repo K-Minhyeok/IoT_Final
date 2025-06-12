@@ -71,49 +71,60 @@
     return await res.json();
   }
 
-  function drawHistory(data) {
-    const ctx = document.getElementById('historyChart').getContext('2d');
-    if (chart) chart.destroy();  // 기존 차트 삭제
+ function drawHistory(data) {
+  const ctx = document.getElementById('historyChart').getContext('2d');
+  if (chart) chart.destroy();
 
-    chart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: data.timestamp,
-        datasets: [
-          {
-            label: 'Room1',
-            data: data.Room1,
-            borderColor: '#4CAF50',
-            fill: false
-          },
-          {
-            label: 'Cafeteria',
-            data: data.Cafeteria,
-            borderColor: '#FFC107',
-            fill: false
-          },
-          {
-            label: 'Gym',
-            data: data.Gym,
-            borderColor: '#F44336',
-            fill: false
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        scales: {
-          x: { 
-            title: { display: true, text: '시간' }
-          },
-          y: { 
-            beginAtZero: true,
-            title: { display: true, text: '인원 수' }
-          }
+  // timestamp → HH:MM만 추출
+  const labels = data.timestamp.map(ts => {
+    const timePart = ts.split(' ')[1]; // 'HH:MM:SS'
+    const [hour, minute] = timePart.split(':');
+    return `${hour}:${minute}`;
+  });
+
+  chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Room1',
+          data: data.Room1,
+          borderColor: '#4CAF50',
+          fill: false
+        },
+        {
+          label: 'Cafeteria',
+          data: data.Cafeteria,
+          borderColor: '#FFC107',
+          fill: false
+        },
+        {
+          label: 'Gym',
+          data: data.Gym,
+          borderColor: '#F44336',
+          fill: false
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        x: { 
+title: {
+  display: true,
+  text: '시간 (HH:MM)',
+  font: { weight: 'bold', size: 14 }
+}        },
+        y: { 
+          beginAtZero: true,
+          title: { display: true, text: '인원 수' }
         }
       }
-    });
-  }
+    }
+  });
+}
+
 
   async function updateChart() {
     const limit = document.getElementById("recordCount").value;

@@ -52,30 +52,33 @@
     return await res.json();
   }
 
-  function drawChart(data) {
-    const labels = Object.keys(data);
-    const counts = Object.values(data);
+function drawChart(data) {
+  const labels = Object.keys(data);
+  const counts = Object.values(data);
 
-    const ctx = document.getElementById('populationChart').getContext('2d');
-    new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: labels,
-        datasets: [{
-          label: '현재 인원 수',
-          data: counts,
-          backgroundColor: ['#4CAF50', '#FFC107', '#F44336'],  // 건물별 색상
-          borderRadius: 8
-        }]
+  const ctx = document.getElementById('populationChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        data: counts,
+        backgroundColor: ['#4CAF50', '#FFC107', '#F44336'],  
+        borderRadius: 8
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false }  // 범례 비활성화
       },
-      options: {
-        responsive: true,
-        scales: {
-          y: { beginAtZero: true }
-        }
+      scales: {
+        y: { beginAtZero: true }
       }
-    });
-  }
+    }
+  });
+}
+
 
   fetchData().then(data => drawChart(data));
 </script>
