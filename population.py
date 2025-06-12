@@ -23,13 +23,13 @@ def save_population(data):
     with open(DATA_FILE, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
+# 주기적으로 엑셀 저장
 def save_to_excel_periodically():
     while True:
-        time.sleep(10)  # 또는 테스트용으로 10
+        time.sleep(600)  # 10분 주기
         data = load_population()
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-        # 각 건물 값이 없으면 0으로 채움
         row = {"timestamp": timestamp}
         for b in BUILDINGS:
             row[b] = data.get(b, 0)
@@ -49,7 +49,7 @@ def get_population():
     data = load_population()
     return jsonify(data)
 
-# 인원 업데이트 API
+# 일반 수동 업데이트 API
 @app.route('/update', methods=['POST'])
 def update_population():
     content = request.json
@@ -68,12 +68,14 @@ def update_population():
     save_population(data)
     return jsonify(success=True, updated=data[building])
 
-# Lora 입력 처리 API
+# LoRa → WiFi → Flask로 들어오는 API
 @app.route('/lora', methods=['POST'])
 def update_from_lora():
-    content = request.get_data(as_text=True).strip()
-    print(content)
     try:
+        # 여기 핵심: TTGO가 보내는 text/plain 데이터 받기
+        content = request.get_data(as_text=True).strip()
+        print(f"수신 데이터: {content}")
+
         building, direction = content.split(":")
         building = building.strip()
         direction = direction.strip()
@@ -94,15 +96,14 @@ def update_from_lora():
     except Exception as e:
         return jsonify(success=False, error=str(e)), 400
 
-# 지도 페이지
+# 기본 메인 페이지
 @app.route('/')
 def map_page():
     data = load_population()
     return render_template('map.html', data=data)
 
-# Flask 실행
+# 서버 실행
 if __name__ == '__main__':
-    # 스레드 직접 실행
     thread = threading.Thread(target=save_to_excel_periodically, daemon=True)
     thread.start()
-    app.run(debug=True, use_reloader=False)
+    app.run(host='0.0.0.0', port=5000, debug=True, use_reloader=False)
