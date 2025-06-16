@@ -50,12 +50,12 @@
       margin-bottom: 15px;
     }
 
-  #map {
-  flex-grow: 1;
-  height: 100%;
-  width: 100%;
-  background-color: white;   /* <-- 요거 추가! */
-}
+    #map {
+      flex-grow: 1;
+      height: 100%;
+      width: 100%;
+      background-color: white;
+    }
 
     @media (max-width: 768px) {
       .container {
@@ -72,34 +72,37 @@
       }
     }
 
-.info.legend {
-  background: #f2f2f2;
-  padding: 16px 20px;  /* 패딩 확대 */
-  font-size: 16px;     /* 글씨 조금 키움 */
-  border-radius: 10px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-  line-height: 24px;
-  color: #333;
-  margin-left: 40px;
-  margin-top: 30px;
-}
+    .info.legend {
+      background: #f2f2f2;
+      padding: 16px 20px;
+      font-size: 16px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      line-height: 24px;
+      color: #333;
+      margin-left: 40px;
+      margin-top: 30px;
+    }
+
     .legend-title {
       font-weight: bold;
       margin-bottom: 8px;
       text-align: center;
     }
+
     .legend-item {
       display: flex;
       align-items: center;
       margin-bottom: 6px;
     }
+
     .legend-color {
-  width: 18px;    /* 동그라미 조금 키움 */
-  height: 18px;
-  border-radius: 50%;
-  margin-right: 10px;
-  border: 1px solid #999;
-}
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      margin-right: 10px;
+      border: 1px solid #999;
+    }
   </style>
 </head>
 <body>
@@ -175,6 +178,12 @@
     "Cafeteria": [315, 665]
   };
 
+  const maxCapacity = {
+    "Room1": 100,
+    "Cafeteria": 200,
+    "Gym": 50
+  };
+
   const map = L.map('map', {
     crs: L.CRS.Simple,
     minZoom: -1,
@@ -190,15 +199,15 @@
 
   L.imageOverlay(imageUrl, imageBounds).addTo(map);
   map.fitBounds(imageBounds);
-  map.setZoom(map.getZoom());  // 확대 적용
+  map.setZoom(map.getZoom() );
 
   window.addEventListener('resize', () => map.invalidateSize());
 
   let markerLayer = L.layerGroup().addTo(map);
 
-  function getColor(count) {
-    if (count < 50) return 'green';
-    else if (count < 120) return 'yellow';
+  function getColorByPercent(percent) {
+    if (percent <= 40) return 'green';
+    else if (percent <= 70) return 'yellow';
     else return 'red';
   }
 
@@ -218,21 +227,33 @@
     const date_today = String(now.getDate()).padStart(2, '0');
 
     document.getElementById('datetime-header').innerText = `[ ${month}/${date_today} ] ${hh} : ${mi}`;
-    document.getElementById('room1').innerText = `- Room1 : ${data["Room1"] ?? 0}명`;
-    document.getElementById('cafeteria').innerText = `- Cafeteria : ${data["Cafeteria"] ?? 0}명`;
-    document.getElementById('gym').innerText = `- Gym : ${data["Gym"] ?? 0}명`;
+
+    const room1Count = data["Room1"] ?? 0;
+    const room1Percent = ((room1Count / maxCapacity["Room1"]) * 100).toFixed(1);
+    document.getElementById('room1').innerText = `- Room1 : ${room1Count}명 / ${maxCapacity["Room1"]}명`;
+
+    const cafeteriaCount = data["Cafeteria"] ?? 0;
+    const cafeteriaPercent = ((cafeteriaCount / maxCapacity["Cafeteria"]) * 100).toFixed(1);
+    document.getElementById('cafeteria').innerText = `- Cafeteria : ${cafeteriaCount}명 / ${maxCapacity["Cafeteria"]}명`;
+
+    const gymCount = data["Gym"] ?? 0;
+    const gymPercent = ((gymCount / maxCapacity["Gym"]) * 100).toFixed(1);
+    document.getElementById('gym').innerText = `- Gym : ${gymCount}명 / ${maxCapacity["Gym"]}명 `;
 
     markerLayer.clearLayers();
     for (const [name, count] of Object.entries(data)) {
       const coord = buildingCoords[name];
       if (!coord) continue;
 
+      const percent = ((count / maxCapacity[name]) * 100).toFixed(1);
+      const color = getColorByPercent(percent);
+
       L.circle(coord, {
         radius: getRadius(count),
-        color: getColor(count),
-        fillColor: getColor(count),
+        color: color,
+        fillColor: color,
         fillOpacity: 0.7
-      }).bindPopup(`${name}: ${count}명`).addTo(markerLayer);
+      }).bindPopup(`${name}: ${count}명 (${percent}%)`).addTo(markerLayer);
     }
   }
 
@@ -255,9 +276,9 @@
     div.innerHTML += '<div class="legend-title">인원 기준</div>';
 
     const levels = [
-      { color: 'green', label: '50명 미만' },
-      { color: 'yellow', label: '50명 이상' },
-      { color: 'red', label: '120명 이상' }
+      { color: 'green', label: '40% 이하' },
+      { color: 'yellow', label: '40%~70%' },
+      { color: 'red', label: '70% 이상' }
     ];
 
     levels.forEach(l => {
