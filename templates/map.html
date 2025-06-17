@@ -245,15 +245,15 @@
 
     const room1Count = data["Room1"] ?? 0;
     const room1Percent = ((room1Count / maxCapacity["Room1"]) * 100).toFixed(1);
-    document.getElementById('room1').innerText = `- Room1 : ${room1Count}명 / ${maxCapacity["Room1"]}명`;
+    document.getElementById('room1').innerText = `- 제1열람실 : ${room1Count}명 / ${maxCapacity["Room1"]}명`;
 
     const cafeteriaCount = data["Cafeteria"] ?? 0;
     const cafeteriaPercent = ((cafeteriaCount / maxCapacity["Cafeteria"]) * 100).toFixed(1);
-    document.getElementById('cafeteria').innerText = `- Cafeteria : ${cafeteriaCount}명 / ${maxCapacity["Cafeteria"]}명`;
+    document.getElementById('cafeteria').innerText = `- 학관 : ${cafeteriaCount}명 / ${maxCapacity["Cafeteria"]}명`;
 
     const gymCount = data["Gym"] ?? 0;
     const gymPercent = ((gymCount / maxCapacity["Gym"]) * 100).toFixed(1);
-    document.getElementById('gym').innerText = `- Gym : ${gymCount}명 / ${maxCapacity["Gym"]}명`;
+    document.getElementById('gym').innerText = `- 헬스장 : ${gymCount}명 / ${maxCapacity["Gym"]}명`;
 
     markerLayer.clearLayers();
     for (const [name, count] of Object.entries(data)) {

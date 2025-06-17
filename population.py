@@ -68,28 +68,27 @@ def update_population():
     save_population(data)
     return jsonify(success=True, updated=data[building])
 
-# LoRa → WiFi → Flask로 들어오는 API
 @app.route('/lora', methods=['POST'])
 def update_from_lora():
     try:
-        # 여기 핵심: TTGO가 보내는 text/plain 데이터 받기
+        # 핵심: TTGO가 보내는 text/plain 데이터 받기
         content = request.get_data(as_text=True).strip()
         print(f"수신 데이터: {content}")
 
-        building, direction = content.split(":")
+        # 수정된 데이터 형식 파싱
+        building, value = content.split(":")
         building = building.strip()
-        direction = direction.strip()
+        value = int(value.strip())
 
         data = load_population()
         if building not in data:
             data[building] = 0
 
-        if direction == "in":
-            data[building] += 1
-            print(f"{building}: {data[building]} In")
-        elif direction == "out" and data[building] > 0:
-            data[building] -= 1
-            print(f"{building}: {data[building]} Out")
+        data[building] += value
+
+        # 인원수는 음수로 떨어지지 않게 제한
+        if data[building] < 0:
+            data[building] = 0
 
         save_population(data)
         return jsonify(success=True, updated=data[building])
