@@ -97,7 +97,7 @@ def update_from_lora():
     
 @app.route('/upload_image/<location>', methods=['POST'])
 def upload_image(location):
-    location = location.lower()  # 소문자로 통일
+    location = location.lower() 
     file = request.files['file']
     save_dir = 'static/realtime'
     os.makedirs(save_dir, exist_ok=True)

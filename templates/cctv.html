@@ -65,17 +65,17 @@
 
   <div class="cctv-grid">
     <div class="cctv-box">
-      <img id="room1img" src="/static/realtime/Room1.jpg" alt="Room1">
+      <img id="room1img" src="/static/realtime/room1.jpg" alt="Room1">
       <h3>Room1</h3>
     </div>
 
     <div class="cctv-box">
-      <img id="cafeteriaimg" src="/static/realtime/Cafeteria.jpg" alt="Cafeteria">
+      <img id="cafeteriaimg" src="/static/realtime/cafeteria.jpg" alt="Cafeteria">
       <h3>Cafeteria</h3>
     </div>
 
     <div class="cctv-box">
-      <img id="gymimg" src="/static/realtime/Gym.jpg" alt="Gym">
+      <img id="gymimg" src="/static/realtime/gym.jpg" alt="Gym">
       <h3>Gym</h3>
     </div>
   </div>
@@ -86,9 +86,9 @@
 <script>
   function refreshImages() {
     const now = new Date().getTime();
-    document.getElementById("room1img").src = "/static/realtime/Room1.jpg?t=" + now;
-    document.getElementById("cafeteriaimg").src = "/static/realtime/Cafeteria.jpg?t=" + now;
-    document.getElementById("gymimg").src = "/static/realtime/Gym.jpg?t=" + now;
+    document.getElementById("room1img").src = "/static/realtime/room1.jpg?t=" + now;
+    document.getElementById("cafeteriaimg").src = "/static/realtime/cafeteria.jpg?t=" + now;
+    document.getElementById("gymimg").src = "/static/realtime/gym.jpg?t=" + now;
   }
 
   setInterval(refreshImages, 3000);
