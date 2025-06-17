@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template,send_file
 import json
 import os
 import threading
@@ -128,6 +128,9 @@ def history_page():
 def cctv_page():
     return render_template('cctv.html')
 
+@app.route('/download_log')
+def download_log():
+    return send_file('population_log.xlsx', as_attachment=True)
 
 # 기본 메인 페이지
 @app.route('/')

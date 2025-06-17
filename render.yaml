@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: campus-population-monitor
+    env: python
+    buildCommand: ""
+    startCommand: "python population.py"
+    autoDeploy: true
+    envVars:
+      - key: FLASK_ENV
+        value: production

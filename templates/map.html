@@ -156,8 +156,23 @@
         border: none;
         border-radius: 6px;
         cursor: pointer;
+        margin-bottom: 15px;
       ">
         현재 상태 보기
+      </button>
+
+      <br>
+
+      <button onclick="window.location.href='/download_log'" style="
+        padding: 12px 24px;
+        font-size: 16px;
+        background-color: #ffc107;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+      ">
+        데이터 다운로드
       </button>
 
     </div>
@@ -238,7 +253,7 @@
 
     const gymCount = data["Gym"] ?? 0;
     const gymPercent = ((gymCount / maxCapacity["Gym"]) * 100).toFixed(1);
-    document.getElementById('gym').innerText = `- Gym : ${gymCount}명 / ${maxCapacity["Gym"]}명 `;
+    document.getElementById('gym').innerText = `- Gym : ${gymCount}명 / ${maxCapacity["Gym"]}명`;
 
     markerLayer.clearLayers();
     for (const [name, count] of Object.entries(data)) {
