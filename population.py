@@ -95,18 +95,27 @@ def update_from_lora():
     except Exception as e:
         return jsonify(success=False, error=str(e)), 400
     
-# 그래프 페이지 라우터 추가
+@app.route('/upload_image/<location>', methods=['POST'])
+def upload_image(location):
+    location = location.lower()  # 소문자로 통일
+    file = request.files['file']
+    save_dir = 'static/realtime'
+    os.makedirs(save_dir, exist_ok=True)
+    save_path = os.path.join(save_dir, f"{location}.jpg")
+    file.save(save_path)
+    return jsonify(success=True)
+
+
 @app.route('/graph')
 def graph_page():
     return render_template('graph.html')
 
-# 시간별 기록 API (엑셀 불러오기)
 @app.route('/history')
 def get_history():
     if not os.path.exists(EXCEL_FILE):
         return jsonify({"error": "No data"}), 404
 
-    limit = request.args.get('limit', default=10, type=int)  # 파라미터 받기
+    limit = request.args.get('limit', default=10, type=int)  
     df = pd.read_excel(EXCEL_FILE)
     df = df.tail(limit)
 

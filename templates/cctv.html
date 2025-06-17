@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>현재 상태 보기</title>
+  <title>CCTV 모니터링</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     html, body {
@@ -21,45 +21,39 @@
       text-align: center;
     }
     .title {
-      font-size: 28px;
-      margin-bottom: 30px;
+      font-size: 32px;
+      margin-bottom: 40px;
       color: #122b4d;
     }
-    .image-grid {
+    .cctv-grid {
       display: flex;
+      justify-content: space-around;
       flex-wrap: wrap;
-      justify-content: center;
-      gap: 30px;
     }
-    .image-box {
-      background: #f8f9fa;
+    .cctv-box {
+      width: 30%;
+      background-color: #f8f8f8;
       border-radius: 10px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      margin-bottom: 30px;
       padding: 10px;
-      width: 300px;
-      transition: transform 0.3s;
     }
-    .image-box:hover {
-      transform: scale(1.05);
-    }
-    .image-box img {
+    .cctv-box img {
       width: 100%;
-      border-radius: 8px;
+      border-radius: 10px;
     }
-    .image-label {
-      margin-top: 10px;
-      font-size: 18px;
-      font-weight: 500;
+    .cctv-box h3 {
+      margin-top: 15px;
       color: #333;
     }
     button {
+      margin-top: 20px;
       padding: 10px 20px;
-      margin-top: 30px;
+      font-size: 16px;
       background-color: #007bff;
       color: white;
       border: none;
       border-radius: 6px;
-      font-size: 16px;
       cursor: pointer;
     }
   </style>
@@ -69,25 +63,36 @@
 <div class="container">
   <div class="title">현재 상태 보기 (CCTV)</div>
 
-  <div class="image-grid">
-    <div class="image-box">
-      <img src="{{ url_for('static', filename='images/room1.png') }}" alt="Room1">
-      <div class="image-label">Room1</div>
+  <div class="cctv-grid">
+    <div class="cctv-box">
+      <img id="room1img" src="/static/realtime/Room1.jpg" alt="Room1">
+      <h3>Room1</h3>
     </div>
 
-    <div class="image-box">
-      <img src="{{ url_for('static', filename='images/cafeteria.png') }}" alt="Cafeteria">
-      <div class="image-label">Cafeteria</div>
+    <div class="cctv-box">
+      <img id="cafeteriaimg" src="/static/realtime/Cafeteria.jpg" alt="Cafeteria">
+      <h3>Cafeteria</h3>
     </div>
 
-    <div class="image-box">
-      <img src="{{ url_for('static', filename='images/gym.png') }}" alt="Gym">
-      <div class="image-label">Gym</div>
+    <div class="cctv-box">
+      <img id="gymimg" src="/static/realtime/Gym.jpg" alt="Gym">
+      <h3>Gym</h3>
     </div>
   </div>
 
   <button onclick="window.location.href='/'">← 메인으로</button>
 </div>
+
+<script>
+  function refreshImages() {
+    const now = new Date().getTime();
+    document.getElementById("room1img").src = "/static/realtime/Room1.jpg?t=" + now;
+    document.getElementById("cafeteriaimg").src = "/static/realtime/Cafeteria.jpg?t=" + now;
+    document.getElementById("gymimg").src = "/static/realtime/Gym.jpg?t=" + now;
+  }
+
+  setInterval(refreshImages, 3000);
+</script>
 
 </body>
 </html>
