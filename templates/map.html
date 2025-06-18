@@ -87,7 +87,15 @@
 
       #map {
         width: 100%;
-        height: 500px;
+        height: calc(100vh - 370px); /* 버튼 + 상태 영역 여유 */
+      }
+
+      .info.legend {
+        font-size: 18px;
+        padding: 16px 24px;
+        max-width: 250px;
+        margin-left: 10px;
+        margin-top: 10px;
       }
     }
 
@@ -100,6 +108,8 @@
       line-height: 24px;
       color: #333;
       max-width: 200px;
+      margin-left: 40px;
+      margin-top: 30px;
     }
 
     .legend-title {
@@ -177,7 +187,6 @@
 
   L.imageOverlay(imageUrl, imageBounds).addTo(map);
   map.fitBounds(imageBounds);
-  map.setZoom(map.getZoom());
 
   window.addEventListener('resize', () => {
     map.invalidateSize();
@@ -247,7 +256,10 @@
   fetchAndUpdate();
   setInterval(fetchAndUpdate, 3000);
 
-  const legend = L.control({ position: 'topleft' });
+  const legend = L.control({
+    position: window.innerWidth < 768 ? 'topright' : 'topleft'
+  });
+
   legend.onAdd = function () {
     const div = L.DomUtil.create('div', 'info legend');
     div.innerHTML += '<div class="legend-title">인원 기준</div>';
@@ -268,6 +280,7 @@
 
     return div;
   };
+
   legend.addTo(map);
 </script>
 
