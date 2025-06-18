@@ -53,9 +53,9 @@
 
     #map {
       flex: 1;
-      min-height: 400px;
-      height: 100vh;
+      height: 100dvh; /* 모바일에서도 주소창 제외하고 꽉 차게 */
       background-color: white;
+      min-height: 400px;
     }
 
     button {
@@ -87,15 +87,14 @@
 
       #map {
         width: 100%;
-        height: calc(100vh - 370px); /* 버튼 + 상태 영역 여유 */
+        height: 100dvh;
       }
 
       .info.legend {
         font-size: 18px;
         padding: 16px 24px;
         max-width: 250px;
-        margin-left: 10px;
-        margin-top: 10px;
+        margin: 10px;
       }
     }
 
@@ -256,9 +255,7 @@
   fetchAndUpdate();
   setInterval(fetchAndUpdate, 3000);
 
-  const legend = L.control({
-    position: window.innerWidth < 768 ? 'topright' : 'topleft'
-  });
+  const legend = L.control({ position: 'topleft' }); // 항상 왼쪽 위 고정
 
   legend.onAdd = function () {
     const div = L.DomUtil.create('div', 'info legend');
