@@ -5,11 +5,39 @@ import threading
 import time
 import pandas as pd
 from datetime import datetime
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import unpad
+from base64 import b64decode
+from datetime import datetime
+
+
+
+AES_KEY = b'kmhhsyhguiot1234'  # 16-byte key
+BLOCK_SIZE = 16
 
 app = Flask(__name__)
 DATA_FILE = 'population.json'
 EXCEL_FILE = 'population_log.xlsx'
 BUILDINGS = ["Room1", "Cafeteria", "Gym"]
+
+
+def decrypt_lora_message(encrypted_base64):
+    try:
+        cipher = AES.new(AES_KEY, AES.MODE_ECB)
+        decrypted = unpad(cipher.decrypt(b64decode(encrypted_base64)), BLOCK_SIZE)
+        return decrypted.decode('utf-8')
+    except Exception as e:
+        return None
+
+def is_recent_timestamp(ts_str):
+    try:
+        now = datetime.now()
+        msg_time = datetime.strptime(ts_str, "%d%H%M%S")
+        msg_time = msg_time.replace(year=now.year, month=now.month)
+        return abs((now - msg_time).total_seconds()) <= 30
+    except Exception:
+        return False
+    
 
 def load_population():
     if not os.path.exists(DATA_FILE):
@@ -66,27 +94,42 @@ def update_population():
 @app.route('/lora', methods=['POST'])
 def update_from_lora():
     try:
-        content = request.get_data(as_text=True).strip()
-        print(f"수신 데이터: {content}")
-        app.logger.info(f"[LoRa 수신] {content}")  
+        encrypted_b64 = request.get_data(as_text=True).strip()
+        app.logger.info(f"[LoRa 수신] (암호문): {encrypted_b64}") 
 
-        building, value = content.split(":")
+        decrypted = decrypt_lora_message(encrypted_b64)
+        if not decrypted or '/' not in decrypted:
+            app.logger.warning(f"복호화 실패 또는 포맷 오류: {decrypted}")
+            return jsonify(success=False, error="복호화 실패 또는 포맷 오류"), 400
+
+        payload, timestamp = decrypted.split('/')
+        app.logger.info(f"복호화 결과 : {payload} | {timestamp} ")
+        
+        if not is_recent_timestamp(timestamp):
+            app.logger.warning(f"유효하지 않은 timestamp 수신: {timestamp}")
+            return jsonify(success=False, error="유효하지 않은 timestamp (30초 초과)"), 400
+
+        building, value = payload.split(':')
         building = building.strip()
         value = int(value.strip())
+
+        app.logger.info(f"처리 대상 → building: {building}, value: {value}, timestamp: {timestamp}")
 
         data = load_population()
         if building not in data:
             data[building] = 0
 
         data[building] += value
-
         if data[building] < 0:
             data[building] = 0
 
         save_population(data)
+        app.logger.info(f"인원 업데이트 완료: {building} = {data[building]}")
         return jsonify(success=True, updated=data[building])
     except Exception as e:
+        app.logger.error(f"[LoRa 처리 오류] {str(e)}")
         return jsonify(success=False, error=str(e)), 400
+
     
 @app.route('/upload_image/<location>', methods=['POST'])
 def upload_image(location):
