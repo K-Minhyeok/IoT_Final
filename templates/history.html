@@ -48,7 +48,6 @@
 <div class="container">
   <div class="title">시간별 밀집도 기록</div>
 
-  <!-- 드롭다운 -->
   <div>
     <label for="recordCount">최근 기록 개수: </label>
     <select id="recordCount">
@@ -71,60 +70,59 @@
     return await res.json();
   }
 
- function drawHistory(data) {
-  const ctx = document.getElementById('historyChart').getContext('2d');
-  if (chart) chart.destroy();
+  function drawHistory(data) {
+    const ctx = document.getElementById('historyChart').getContext('2d');
+    if (chart) chart.destroy();
 
-  // timestamp → HH:MM만 추출
-  const labels = data.timestamp.map(ts => {
-    const timePart = ts.split(' ')[1]; // 'HH:MM:SS'
-    const [hour, minute] = timePart.split(':');
-    return `${hour}:${minute}`;
-  });
+    const labels = data.timestamp.map(ts => {
+      const timePart = ts.split(' ')[1];
+      const [hour, minute] = timePart.split(':');
+      return `${hour}:${minute}`;
+    });
 
-  chart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: labels,
-      datasets: [
-        {
-          label: 'Room1',
-          data: data.Room1,
-          borderColor: '#4CAF50',
-          fill: false
-        },
-        {
-          label: 'Cafeteria',
-          data: data.Cafeteria,
-          borderColor: '#FFC107',
-          fill: false
-        },
-        {
-          label: 'Gym',
-          data: data.Gym,
-          borderColor: '#F44336',
-          fill: false
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      scales: {
-        x: { 
-title: {
-  display: true,
-  text: '시간 (HH:MM)',
-  font: { weight: 'bold', size: 14 }
-}        },
-        y: { 
-          beginAtZero: true,
-          title: { display: true, text: '인원 수' }
+    chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: '제1열람실',
+            data: data.Room1,
+            borderColor: '#4CAF50',
+            fill: false
+          },
+          {
+            label: '학관',
+            data: data.Cafeteria,
+            borderColor: '#FFC107',
+            fill: false
+          },
+          {
+            label: '헬스장',
+            data: data.Gym,
+            borderColor: '#F44336',
+            fill: false
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          x: { 
+            title: {
+              display: true,
+              text: '시간 (HH:MM)',
+              font: { weight: 'bold', size: 14 }
+            }
+          },
+          y: { 
+            beginAtZero: true,
+            title: { display: true, text: '인원 수' }
+          }
         }
       }
-    }
-  });
-}
-
+    });
+  }
 
   async function updateChart() {
     const limit = document.getElementById("recordCount").value;
@@ -134,7 +132,6 @@ title: {
 
   document.getElementById("recordCount").addEventListener('change', updateChart);
 
-  // 최초 로딩시 실행
   updateChart();
 </script>
 

@@ -53,7 +53,13 @@
   }
 
 function drawChart(data) {
-  const labels = Object.keys(data);
+  const labelMap = {
+    "Cafeteria": "학관",
+    "Gym": "헬스장",
+    "Room1": "제1열람실"
+  };
+
+  const labels = Object.keys(data).map(key => labelMap[key] || key); 
   const counts = Object.values(data);
 
   const ctx = document.getElementById('populationChart').getContext('2d');
@@ -63,14 +69,14 @@ function drawChart(data) {
       labels: labels,
       datasets: [{
         data: counts,
-        backgroundColor: ['#4CAF50', '#FFC107', '#F44336'],  
+        backgroundColor: ['#4CAF50', '#FFC107', '#F44336'],
         borderRadius: 8
       }]
     },
     options: {
       responsive: true,
       plugins: {
-        legend: { display: false }  // 범례 비활성화
+        legend: { display: false }
       },
       scales: {
         y: { beginAtZero: true }
@@ -78,6 +84,7 @@ function drawChart(data) {
     }
   });
 }
+
 
 
   fetchData().then(data => drawChart(data));

@@ -11,22 +11,19 @@ DATA_FILE = 'population.json'
 EXCEL_FILE = 'population_log.xlsx'
 BUILDINGS = ["Room1", "Cafeteria", "Gym"]
 
-# JSON 파일 불러오기
 def load_population():
     if not os.path.exists(DATA_FILE):
         return {}
     with open(DATA_FILE, 'r', encoding='utf-8') as f:
         return json.load(f)
 
-# JSON 파일 저장
 def save_population(data):
     with open(DATA_FILE, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
-# 주기적으로 엑셀 저장
 def save_to_excel_periodically():
     while True:
-        time.sleep(600)  # 10분 주기
+        time.sleep(600) 
         data = load_population()
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
@@ -43,13 +40,11 @@ def save_to_excel_periodically():
         df_new.to_excel(EXCEL_FILE, index=False)
         print(f"[{timestamp}] Excel 저장 완료.")
 
-# 인원 조회 API
 @app.route('/population')
 def get_population():
     data = load_population()
     return jsonify(data)
 
-# 일반 수동 업데이트 API
 @app.route('/update', methods=['POST'])
 def update_population():
     content = request.json
@@ -71,11 +66,10 @@ def update_population():
 @app.route('/lora', methods=['POST'])
 def update_from_lora():
     try:
-        # 핵심: TTGO가 보내는 text/plain 데이터 받기
         content = request.get_data(as_text=True).strip()
         print(f"수신 데이터: {content}")
+        app.logger.info(f"[LoRa 수신] {content}")  
 
-        # 수정된 데이터 형식 파싱
         building, value = content.split(":")
         building = building.strip()
         value = int(value.strip())
@@ -86,7 +80,6 @@ def update_from_lora():
 
         data[building] += value
 
-        # 인원수는 음수로 떨어지지 않게 제한
         if data[building] < 0:
             data[building] = 0
 
@@ -140,13 +133,11 @@ def cctv_page():
 def download_log():
     return send_file('population_log.xlsx', as_attachment=True)
 
-# 기본 메인 페이지
 @app.route('/')
 def map_page():
     data = load_population()
     return render_template('map.html', data=data)
 
-# 서버 실행
 if __name__ == '__main__':
     thread = threading.Thread(target=save_to_excel_periodically, daemon=True)
     thread.start()
