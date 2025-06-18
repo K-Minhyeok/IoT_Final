@@ -94,7 +94,7 @@ def upload_image(location):
     file = request.files['file']
     save_dir = 'static/realtime'
     os.makedirs(save_dir, exist_ok=True)
-    save_path = os.path.join(save_dir, f"{location}.jpg")
+    save_path = os.path.join(save_dir, f"{location}.png")
     file.save(save_path)
     return jsonify(success=True)
 

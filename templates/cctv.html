@@ -65,26 +65,17 @@
 
   <div class="cctv-grid">
     <div class="cctv-box">
-      <img id="room1img" 
-           src="/static/realtime/room1.jpg" 
-           alt="Room1" 
-           onerror="this.onerror=null; this.src='/static/images/room1.jpg';">
+      <img id="room1img" src="/static/images/room1.png" alt="Room1">
       <h3>Room1</h3>
     </div>
 
     <div class="cctv-box">
-      <img id="cafeteriaimg" 
-           src="/static/realtime/cafeteria.jpg" 
-           alt="Cafeteria" 
-           onerror="this.onerror=null; this.src='/static/images/cafeteria.jpg';">
+      <img id="cafeteriaimg" src="/static/images/cafeteria.png" alt="Cafeteria">
       <h3>Cafeteria</h3>
     </div>
 
     <div class="cctv-box">
-      <img id="gymimg" 
-           src="/static/realtime/gym.jpg" 
-           alt="Gym" 
-           onerror="this.onerror=null; this.src='/static/images/gym.jpg';">
+      <img id="gymimg" src="/static/images/gym.png" alt="Gym">
       <h3>Gym</h3>
     </div>
   </div>
@@ -93,11 +84,25 @@
 </div>
 
 <script>
-  function refreshImages() {
+  function tryLoadImage(id, realtimePath, fallbackPath) {
+    const img = new Image();
     const now = new Date().getTime();
-    document.getElementById("room1img").src = "/static/realtime/room1.jpg?t=" + now;
-    document.getElementById("cafeteriaimg").src = "/static/realtime/cafeteria.jpg?t=" + now;
-    document.getElementById("gymimg").src = "/static/realtime/gym.jpg?t=" + now;
+
+    img.onload = () => {
+      document.getElementById(id).src = realtimePath + "?t=" + now;
+    };
+
+    img.onerror = () => {
+      document.getElementById(id).src = fallbackPath;
+    };
+
+    img.src = realtimePath + "?t=" + now;
+  }
+
+  function refreshImages() {
+    tryLoadImage("room1img", "/static/realtime/room1.png", "/static/images/room1.png");
+    tryLoadImage("cafeteriaimg", "/static/realtime/cafeteria.png", "/static/images/cafeteria.png");
+    tryLoadImage("gymimg", "/static/realtime/gym.png", "/static/images/gym.png");
   }
 
   setInterval(refreshImages, 3000);
