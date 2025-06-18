@@ -99,6 +99,7 @@ def upload_image(location):
     return jsonify(success=True)
 
 
+
 @app.route('/graph')
 def graph_page():
     return render_template('graph.html')

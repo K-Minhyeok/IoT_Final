@@ -50,12 +50,12 @@
       margin-bottom: 15px;
     }
 
-    #map {
-      flex-grow: 1;
-      height: 100%;
-      width: 100%;
-      background-color: white;
-    }
+   #map {
+  flex-grow: 1;
+  min-height: 400px; 
+  width: 100%;
+  background-color: white;
+}
 
     @media (max-width: 768px) {
       .container {
@@ -216,7 +216,10 @@
   map.fitBounds(imageBounds);
   map.setZoom(map.getZoom() );
 
-  window.addEventListener('resize', () => map.invalidateSize());
+window.addEventListener('resize', () => {
+  map.invalidateSize();
+  map.setZoom(map.getZoom()); 
+});
 
   let markerLayer = L.layerGroup().addTo(map);
 
