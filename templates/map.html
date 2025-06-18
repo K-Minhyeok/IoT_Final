@@ -8,17 +8,18 @@
   <style>
     html, body {
       margin: 0;
+      padding: 0;
       height: 100%;
       font-family: 'Segoe UI', sans-serif;
       background-color: white;
+      overflow-x: hidden;
     }
 
     .container {
       display: flex;
       flex-direction: row;
-      height: 100%;
+      height: 100vh;
       width: 100%;
-      overflow: hidden;
     }
 
     #status {
@@ -27,8 +28,8 @@
       color: white;
       padding: 20px;
       box-sizing: border-box;
-      flex-shrink: 1;
-      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.3);
+      flex-shrink: 0;
+      overflow-y: auto;
     }
 
     .header-title {
@@ -50,16 +51,18 @@
       margin-bottom: 15px;
     }
 
-   #map {
-  flex-grow: 1;
-  min-height: 400px; 
-  width: 100%;
-  background-color: white;
-}
+    #map {
+      flex-grow: 1;
+      width: 100%;
+      height: 100vh;
+      background-color: white;
+      min-height: 400px;
+    }
 
     @media (max-width: 768px) {
       .container {
         flex-direction: column;
+        height: auto;
       }
       #status {
         width: 100%;
@@ -67,8 +70,8 @@
         padding: 15px;
       }
       #map {
-        height: 70%;
         width: 100%;
+        height: 500px;
       }
     }
 
@@ -117,66 +120,11 @@
     <div class="stat-line" id="gym"></div>
 
     <div style="text-align: left; margin-top: 30px;">
-      
-      <button onclick="window.location.href='/graph'" style="
-        padding: 12px 24px;
-        font-size: 16px;
-        background-color: #007bff;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        margin-bottom: 15px;
-      ">
-        그래프 보기
-      </button>
-
-      <br>
-
-      <button onclick="window.location.href='/history_view'" style="
-        padding: 12px 24px;
-        font-size: 16px;
-        background-color: #28a745;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        margin-bottom: 15px;
-      ">
-        시간별 기록 보기
-      </button>
-
-      <br>
-
-      <button onclick="window.location.href='/cctv'" style="
-        padding: 12px 24px;
-        font-size: 16px;
-        background-color: #6c757d;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        margin-bottom: 15px;
-      ">
-        현재 상태 보기
-      </button>
-
-      <br>
-
-      <button onclick="window.location.href='/download_log'" style="
-        padding: 12px 24px;
-        font-size: 16px;
-        background-color: #ffc107;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-      ">
-        데이터 다운로드
-      </button>
-
+      <button onclick="window.location.href='/graph'" style="padding: 12px 24px; font-size: 16px; background-color: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; margin-bottom: 15px;">그래프 보기</button><br>
+      <button onclick="window.location.href='/history_view'" style="padding: 12px 24px; font-size: 16px; background-color: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer; margin-bottom: 15px;">시간별 기록 보기</button><br>
+      <button onclick="window.location.href='/cctv'" style="padding: 12px 24px; font-size: 16px; background-color: #6c757d; color: white; border: none; border-radius: 6px; cursor: pointer; margin-bottom: 15px;">현재 상태 보기</button><br>
+      <button onclick="window.location.href='/download_log'" style="padding: 12px 24px; font-size: 16px; background-color: #ffc107; color: white; border: none; border-radius: 6px; cursor: pointer;">데이터 다운로드</button>
     </div>
-
   </div>
 
   <div id="map"></div>
@@ -214,12 +162,12 @@
 
   L.imageOverlay(imageUrl, imageBounds).addTo(map);
   map.fitBounds(imageBounds);
-  map.setZoom(map.getZoom() );
+  map.setZoom(map.getZoom());
 
-window.addEventListener('resize', () => {
-  map.invalidateSize();
-  map.setZoom(map.getZoom()); 
-});
+  window.addEventListener('resize', () => {
+    map.invalidateSize();
+    map.setZoom(map.getZoom());
+  });
 
   let markerLayer = L.layerGroup().addTo(map);
 
@@ -247,15 +195,12 @@ window.addEventListener('resize', () => {
     document.getElementById('datetime-header').innerText = `[ ${month}/${date_today} ] ${hh} : ${mi}`;
 
     const room1Count = data["Room1"] ?? 0;
-    const room1Percent = ((room1Count / maxCapacity["Room1"]) * 100).toFixed(1);
     document.getElementById('room1').innerText = `- 제1열람실 : ${room1Count}명 / ${maxCapacity["Room1"]}명`;
 
     const cafeteriaCount = data["Cafeteria"] ?? 0;
-    const cafeteriaPercent = ((cafeteriaCount / maxCapacity["Cafeteria"]) * 100).toFixed(1);
     document.getElementById('cafeteria').innerText = `- 학관 : ${cafeteriaCount}명 / ${maxCapacity["Cafeteria"]}명`;
 
     const gymCount = data["Gym"] ?? 0;
-    const gymPercent = ((gymCount / maxCapacity["Gym"]) * 100).toFixed(1);
     document.getElementById('gym').innerText = `- 헬스장 : ${gymCount}명 / ${maxCapacity["Gym"]}명`;
 
     markerLayer.clearLayers();
