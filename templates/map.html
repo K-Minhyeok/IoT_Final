@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
   <meta charset="utf-8">
   <title>Campus Population Map</title>
@@ -12,63 +12,79 @@
       height: 100%;
       font-family: 'Segoe UI', sans-serif;
       background-color: white;
-      overflow-x: hidden;
     }
 
     .container {
       display: flex;
       flex-direction: row;
-      height: 100vh;
+      flex-wrap: wrap;
       width: 100%;
+      height: 100%;
     }
 
     #status {
-      min-width: 300px;
+      width: 300px;
       background-color: #122b4d;
       color: white;
       padding: 20px;
       box-sizing: border-box;
-      flex-shrink: 0;
       overflow-y: auto;
+      flex-shrink: 0;
     }
 
     .header-title {
       text-align: center;
-      font-size: 32px;
+      font-size: clamp(20px, 4vw, 32px);
       font-weight: bold;
       margin-top: 10px;
     }
 
     .header-sub {
       text-align: center;
-      font-size: 20px;
+      font-size: clamp(14px, 2vw, 18px);
       color: #ddd;
       margin-top: 5px;
     }
 
     .stat-line {
-      font-size: 18px;
-      margin-bottom: 15px;
+      font-size: 16px;
+      margin-bottom: 10px;
     }
 
     #map {
-      flex-grow: 1;
-      width: 100%;
+      flex: 1;
+      min-height: 400px;
       height: 100vh;
       background-color: white;
-      min-height: 400px;
     }
+
+    button {
+      padding: 12px 24px;
+      font-size: 16px;
+      margin-bottom: 10px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    .btn-blue { background-color: #007bff; color: white; }
+    .btn-green { background-color: #28a745; color: white; }
+    .btn-gray  { background-color: #6c757d; color: white; }
+    .btn-yellow { background-color: #ffc107; color: white; }
 
     @media (max-width: 768px) {
       .container {
         flex-direction: column;
         height: auto;
       }
+
       #status {
         width: 100%;
         height: auto;
         padding: 15px;
       }
+
       #map {
         width: 100%;
         height: 500px;
@@ -83,8 +99,7 @@
       box-shadow: 0 2px 6px rgba(0,0,0,0.3);
       line-height: 24px;
       color: #333;
-      margin-left: 40px;
-      margin-top: 30px;
+      max-width: 200px;
     }
 
     .legend-title {
@@ -119,11 +134,11 @@
     <div class="stat-line" id="cafeteria"></div>
     <div class="stat-line" id="gym"></div>
 
-    <div style="text-align: left; margin-top: 30px;">
-      <button onclick="window.location.href='/graph'" style="padding: 12px 24px; font-size: 16px; background-color: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; margin-bottom: 15px;">그래프 보기</button><br>
-      <button onclick="window.location.href='/history_view'" style="padding: 12px 24px; font-size: 16px; background-color: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer; margin-bottom: 15px;">시간별 기록 보기</button><br>
-      <button onclick="window.location.href='/cctv'" style="padding: 12px 24px; font-size: 16px; background-color: #6c757d; color: white; border: none; border-radius: 6px; cursor: pointer; margin-bottom: 15px;">현재 상태 보기</button><br>
-      <button onclick="window.location.href='/download_log'" style="padding: 12px 24px; font-size: 16px; background-color: #ffc107; color: white; border: none; border-radius: 6px; cursor: pointer;">데이터 다운로드</button>
+    <div style="margin-top: 30px;">
+      <button class="btn-blue" onclick="location.href='/graph'">그래프 보기</button>
+      <button class="btn-green" onclick="location.href='/history_view'">시간별 기록 보기</button>
+      <button class="btn-gray" onclick="location.href='/cctv'">현재 상태 보기</button>
+      <button class="btn-yellow" onclick="location.href='/download_log'">데이터 다운로드</button>
     </div>
   </div>
 
@@ -132,7 +147,7 @@
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
-  const imageUrl = "{{ url_for('static', filename='images/campus_map.png') }}";
+  const imageUrl = "{{ url_for('static', filename='images/campus_map.png') }}"; // Flask용
   const imageBounds = [[0, 0], [869, 1170]];
 
   const buildingCoords = {
@@ -181,8 +196,7 @@
     const minRadius = 20;
     const maxRadius = 80;
     const maxCount = 200;
-    const radius = minRadius + (Math.min(count, maxCount) / maxCount) * (maxRadius - minRadius);
-    return radius;
+    return minRadius + (Math.min(count, maxCount) / maxCount) * (maxRadius - minRadius);
   }
 
   function updateDisplay(data) {
