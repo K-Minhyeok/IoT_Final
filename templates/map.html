@@ -53,7 +53,7 @@
 
     #map {
       flex: 1;
-      height: 100dvh; /* 모바일에서도 주소창 제외하고 꽉 차게 */
+      height: 100dvh;
       background-color: white;
       min-height: 400px;
     }
@@ -173,7 +173,7 @@
 
   const map = L.map('map', {
     crs: L.CRS.Simple,
-    minZoom: -1,
+    minZoom: -2,
     maxZoom: 2,
     zoomSnap: 0.1,
     dragging: false,
@@ -185,11 +185,17 @@
   });
 
   L.imageOverlay(imageUrl, imageBounds).addTo(map);
+
+  // 지도 기본 영역 맞춤
   map.fitBounds(imageBounds);
+
+  // ✅ 모바일에서만 확대 축소 한 단계 줄이기
+  if (window.innerWidth < 768) {
+    map.setZoom(map.getZoom() - 0.5); // 또는 -1 (더 작게 보고 싶다면)
+  }
 
   window.addEventListener('resize', () => {
     map.invalidateSize();
-    map.setZoom(map.getZoom());
   });
 
   let markerLayer = L.layerGroup().addTo(map);
@@ -255,7 +261,7 @@
   fetchAndUpdate();
   setInterval(fetchAndUpdate, 3000);
 
-  const legend = L.control({ position: 'topleft' }); // 항상 왼쪽 위 고정
+  const legend = L.control({ position: 'topleft' });
 
   legend.onAdd = function () {
     const div = L.DomUtil.create('div', 'info legend');
