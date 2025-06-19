@@ -174,6 +174,10 @@ def get_history():
 
     limit = request.args.get('limit', default=10, type=int)  
     df = pd.read_excel(EXCEL_FILE)
+
+    df["timestamp"] = pd.to_datetime(df["timestamp"]) 
+    df["timestamp"] = df["timestamp"].dt.strftime('%Y-%m-%d %H:%M:%S')
+
     df = df.tail(limit)
 
     result = {
@@ -183,6 +187,7 @@ def get_history():
         "Gym": df["Gym"].tolist()
     }
     return jsonify(result)
+
 
 
 @app.route('/history_view')
