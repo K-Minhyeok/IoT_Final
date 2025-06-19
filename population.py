@@ -24,10 +24,11 @@ BUILDINGS = ["Room1", "Cafeteria", "Gym"]
 def decrypt_lora_message(encrypted_base64):
     try:
         cipher = AES.new(AES_KEY, AES.MODE_ECB)
-        decrypted = unpad(cipher.decrypt(b64decode(encrypted_base64)), BLOCK_SIZE)
-        return decrypted.decode('utf-8')
+        decrypted = cipher.decrypt(b64decode(encrypted_base64))
+        unpadded = unpad(decrypted, BLOCK_SIZE)
+        return unpadded.decode('utf-8')
     except Exception as e:
-        app.logger.error(f"복호화 중 오류 발생: {e}")
+        app.logger.error(f"[복호화 오류] {e}")
         return None
 
 def is_recent_timestamp(ts_str):
