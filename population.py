@@ -172,13 +172,23 @@ def get_history():
     if not os.path.exists(EXCEL_FILE):
         return jsonify({"error": "No data"}), 404
 
-    limit = request.args.get('limit', default=10, type=int)  
     df = pd.read_excel(EXCEL_FILE)
+    df["timestamp"] = pd.to_datetime(df["timestamp"])
 
-    df["timestamp"] = pd.to_datetime(df["timestamp"]) 
+    # ✅ 날짜 기반 요청 처리
+    date_str = request.args.get('date')
+    if date_str:
+        try:
+            target_date = pd.to_datetime(date_str).date()
+            df = df[df["timestamp"].dt.date == target_date]
+        except:
+            return jsonify({"error": "Invalid date format"}), 400
+    else:
+        limit = request.args.get('limit', default=10, type=int)
+        df = df.tail(limit)
+
+    # 문자열로 변환
     df["timestamp"] = df["timestamp"].dt.strftime('%Y-%m-%d %H:%M:%S')
-
-    df = df.tail(limit)
 
     result = {
         "timestamp": df["timestamp"].tolist(),
