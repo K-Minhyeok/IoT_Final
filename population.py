@@ -106,9 +106,23 @@ def update_from_lora():
 
         payload, timestamp = decrypted.split('/')
         app.logger.info(f"복호화 결과 : {payload} | {timestamp} ")
-        
+
+        # ✅ timestamp 유효성 검사 + 디버깅 로그
         if not is_recent_timestamp(timestamp):
-            app.logger.warning(f"유효하지 않은 timestamp 수신: {timestamp}")
+            now = datetime.now()
+            try:
+                msg_time = datetime.strptime(timestamp, "%d%H%M%S")
+                msg_time = msg_time.replace(year=now.year, month=now.month)
+                delta = abs((now - msg_time).total_seconds())
+                app.logger.warning(
+                    f"유효하지 않은 timestamp 수신: {timestamp} | "
+                    f"기준 시간: {now.strftime('%Y-%m-%d %H:%M:%S')} | "
+                    f"msg_time: {msg_time.strftime('%Y-%m-%d %H:%M:%S')} | "
+                    f"차이: {delta:.2f}초"
+                )
+            except Exception as e:
+                app.logger.warning(f"timestamp 파싱 실패: {timestamp} | 오류: {e}")
+            
             return jsonify(success=False, error="유효하지 않은 timestamp (30초 초과)"), 400
 
         building, value = payload.split(':')
@@ -131,6 +145,7 @@ def update_from_lora():
     except Exception as e:
         app.logger.error(f"[LoRa 처리 오류] {str(e)}")
         return jsonify(success=False, error=str(e)), 400
+
 
     
 @app.route('/upload_image/<location>', methods=['POST'])
