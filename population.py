@@ -13,7 +13,7 @@ from datetime import datetime, timedelta
 
 
 
-AES_KEY = b'kmhhsyhguiot1234'  # 16-byte key
+AES_KEY = b'kmhhsyhguiot1234' 
 BLOCK_SIZE = 16
 
 app = Flask(__name__)
@@ -102,18 +102,17 @@ def update_from_lora():
 
         decrypted = decrypt_lora_message(encrypted_b64)
         if not decrypted or '/' not in decrypted:
-            app.logger.warning(f"복호화 실패 또는 포맷 오류: {decrypted}")
-            return jsonify(success=False, error="복호화 실패 또는 포맷 오류"), 400
+            app.logger.warning(f"복호화 실패: {decrypted}")
+            return jsonify(success=False, error="복호화 실패 "), 400
 
         payload, timestamp = decrypted.split('/')
         app.logger.info(f"복호화 결과 : {payload} | {timestamp} ")
 
-        # ✅ timestamp 보정 및 유효성 검사
         now = datetime.now()
         try:
             msg_time = datetime.strptime(timestamp, "%d%H%M%S")
             msg_time = msg_time.replace(year=now.year, month=now.month)
-            msg_time -= timedelta(hours=9)  # 9시간 보정 (KST → UTC)
+            msg_time -= timedelta(hours=9) 
 
             delta = abs((now - msg_time).total_seconds())
             if delta > 30:
@@ -175,7 +174,6 @@ def get_history():
     df = pd.read_excel(EXCEL_FILE)
     df["timestamp"] = pd.to_datetime(df["timestamp"])
 
-    # ✅ 날짜 기반 요청 처리
     date_str = request.args.get('date')
     if date_str:
         try:
@@ -187,7 +185,6 @@ def get_history():
         limit = request.args.get('limit', default=10, type=int)
         df = df.tail(limit)
 
-    # 문자열로 변환
     df["timestamp"] = df["timestamp"].dt.strftime('%Y-%m-%d %H:%M:%S')
 
     result = {

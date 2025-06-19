@@ -85,19 +85,29 @@
 
 <script>
   function tryLoadImage(id, realtimePath, fallbackPath) {
-    const img = new Image();
-    const now = new Date().getTime();
+  const img = new Image();
+  const now = new Date().getTime();
 
-    img.onload = () => {
-      document.getElementById(id).src = realtimePath + "?t=" + now;
-    };
+  img.onload = () => {
+    const target = document.getElementById(id);
+    target.src = realtimePath + "?t=" + now;
 
-    img.onerror = () => {
-      document.getElementById(id).src = fallbackPath;
-    };
+    // ✅ Room1만 위아래 반전
+    if (id === "room1img") {
+      target.style.transform = "scaleY(-1)";
+    } else {
+      target.style.transform = "none"; // 나머지는 원래대로
+    }
+  };
 
-    img.src = realtimePath + "?t=" + now;
-  }
+  img.onerror = () => {
+    const target = document.getElementById(id);
+    target.src = fallbackPath;
+    target.style.transform = "none"; // 에러시 반전 제거
+  };
+
+  img.src = realtimePath + "?t=" + now;
+}
 
   function refreshImages() {
     tryLoadImage("room1img", "/static/realtime/room1.png", "/static/images/room1.png");
