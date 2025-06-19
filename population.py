@@ -36,6 +36,7 @@ def is_recent_timestamp(ts_str):
         msg_time = msg_time.replace(year=now.year, month=now.month)
         return abs((now - msg_time).total_seconds()) <= 30
     except Exception:
+        app.logger.error(f"복호화 중 오류 발생: {e}")
         return False
     
 
